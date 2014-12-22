@@ -1,4 +1,4 @@
-package stoplock
+package golocks
 
 import "sync"
 

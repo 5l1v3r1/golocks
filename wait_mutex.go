@@ -1,4 +1,4 @@
-package stoplock
+package golocks
 
 import "time"
 
@@ -12,14 +12,15 @@ func NewWaitMutex() *WaitMutex {
 	return &WaitMutex{NewMutex(), nil}
 }
 
-// SkipWait stops one waiting thread early.
-// The receiving mutex must be locked when SkipWait() is called.
+// Skip stops the waiting thread early.
+// The receiving mutex must be locked when Skip() is called.
 // Returns true if and only if a thread was woken up.
-func (m *WaitMutex) SkipWait() bool {
+func (m *WaitMutex) Skip() bool {
 	if m.skipWait == nil {
 		return false
 	}
 	close(m.skipWait)
+	return true
 }
 
 // Wait waits for a function to complete.
@@ -40,6 +41,7 @@ func (m *WaitMutex) Wait(f func()) bool {
 		f()
 		close(ch)
 	}()
+	m.Unlock()
 	select {
 	case <-ch:
 	case <-m.skipWait:
